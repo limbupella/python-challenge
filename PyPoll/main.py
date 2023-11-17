@@ -1,53 +1,52 @@
+import os
 import csv
 
 # Read the election data from the CSV file
-election_path = "Resources" , "election_data.csv"
+csvpath = os.path.join("Resources" , "election_data.csv")
 
-total_votes = 0
-candidates = {}
-winner = ""
-winner_votes = 0
+count = 0
+candidates = []
+winner = []
+winner_votes = []
+votes_percentage = []
 
-with open(election_path, newline="") as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=",")
-    header = next(csvreader)
+with open(csvpath, newline="") as csvfile:
+    election_data = csv.reader(csvfile, delimiter=",")
+    csv_header = next(election_data)
 
-    for row in csvreader:
-        total_votes += 1
-        candidate = row[2]
+    for row in election_data:
+        count = count + 1
+        candidates.append(row[2])
 
-        # Count votes for each candidate
-        if candidate in candidates:
-            candidates[candidate] += 1
-        else:
-            candidates[candidate] = 1
+unique_candidates = list(set(candidates))
+winner_votes = []
+votes_percentage = []
+for candidate in unique_candidates:
+    votes = candidates.count(candidate)
+    winner_votes.append(votes)
+    votes_percentage.append((votes / count) * 100)
+max_votes = max(winner_votes)
+winner_index = winner_votes.index(max_votes)
+winner = unique_candidates[winner_index]
 
-        # Check for the winner
-        if candidates[candidate] > winner_votes:
-            winner = candidate
-            winner_votes = candidates[candidate]
+print("Election Results")
+print("-------------------------")
+print("Total Votes: " + str(count))
+print("-------------------------")
+for i in range(len(unique_candidates)):
+    print(f"{unique_candidates[i]}: {votes_percentage[i]:.3f}% ({winner_votes[i]})")
+print("-------------------------")
+print("Winner: " + winner)
+print("-------------------------")
 
-# Calculate the percentage of votes for each candidate
-percentage_format = "{:.3%}"
-candidate_results = []
-for candidate, votes in candidates.items():
-    percentage = votes / total_votes
-    formatted_percentage = percentage_format.format(percentage)
-    candidate_results.append(f"{candidate}: {formatted_percentage} ({votes})")
-
-# Print and export results
-output = f"""
-Election Results
--------------------------
-Total Votes: {total_votes}
--------------------------
-{chr(10).join(candidate_results)}
--------------------------
-Winner: {winner}
--------------------------
-"""
-
-print(output)
-
-with open("election_results.txt", "w") as output_file:
-    output_file.write(output)
+output = os.path.join(".","financial_analysis.txt")
+with open(output, "w") as new:
+    new.write("Election Results\n")
+    new.write("-------------------------\n")
+    new.write("Total Votes: " + str(count) + "\n")
+    new.write("-------------------------\n")
+    for i in range(len(unique_candidates)):
+        new.write(f"{unique_candidates[i]}: {votes_percentage[i]:.3f}% ({winner_votes[i]})\n")
+    new.write("-------------------------\n")
+    new.write("Winner: " + winner + "\n")
+    new.write("-------------------------\n")
